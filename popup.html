@@ -11,8 +11,10 @@
   <body>
     <div class="main-container">
       <h1>Simple form autofill</h1>
-    <button id="run"><span>Fill form!</span></button>
-    <script src="popup.js"></script>
+      <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+      <button id="run"><span>Fill form!</span></button>
     </div>
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+    <script src="popup.js"></script>
   </body>
 </html>
