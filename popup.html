@@ -1,36 +1,17 @@
 <!doctype html>
 <html>
   <head>
+    <link rel="stylesheet" href="/styles.css" type="text/css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <meta charset="utf-8" />
     <title>Simple Form Autofill for QA</title>
-    <style>
-      body {
-        font-family: system-ui, Arial;
-        margin: 12px;
-        width: 220px;
-        padding: 24px;
-        border-radius: 24px;
-      }
-      button {
-        width: 100%;
-        padding: 10px;
-        border: solid 1px #c2c5ff;
-        border-radius: 8px;
-        cursor: pointer;
-        background-color: #646CFE;
-        color: white;
-        font-weight: 500;
-        font-size: 1rem;    
-        transition: background-color 0.2s, border-color 0.2s;       
-      }
-      button:hover {
-        background-color: #4c52d9; 
-      }
-      </style>
   </head>
   <body>
-    <div class="container">
-    <button id="run"><span>Fill Form!</span></button>
+    <div class="main-container">
+      <h1>Simple form autofill</h1>
+    <button id="run"><span>Fill form!</span></button>
     <script src="popup.js"></script>
     </div>
   </body>

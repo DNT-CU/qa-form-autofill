@@ -1,0 +1,76 @@
+body {
+width: 256px;
+height: 100%;
+background: rgb(197, 197, 197);
+margin: 4px;
+  }
+
+body, button, h1, h2, span {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+font-size: 16px;
+font-family: system-ui, Figtree;
+}
+
+h1, h2 {
+color: #494462;
+margin: 0px;
+}
+
+p {
+  font-size: 0.75rem;
+  color:#494462;
+}
+
+span {
+  font-weight: 600;
+}
+
+.status {
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 4px;
+  color: #494462;
+  transition: opacity 0.3s ease;
+}
+
+.status.success {
+  color: #1e8e3e;
+}
+
+.status.error {
+  color: #d93025;
+}
+.main-container {
+  margin: auto;
+  border: solid 1px #ededed;
+  border-radius: 12px;
+  color: #ededed;
+  padding: 16px 16px 16px 16px;
+  display: flex;
+  flex-direction:column;
+  gap: 16px;
+  background: linear-gradient(48deg, rgba(237, 237, 237, 1) 0%, rgb(224, 223, 255) 50%, rgb(252, 226, 255) 100%);
+}
+
+button {
+width: 100%;
+height: 100%;
+padding: 10px;
+border: solid 1px #c2c5ff;
+border-radius: 8px;
+cursor: pointer;
+background-color: #646CFE;
+color: white;
+font-weight: 300;
+font-size: 0.75rem;    
+transition: background-color 0.2s, border-color 0.2s;       
+}
+
+button:hover {
+background-color: #4c52d9; 
+}
