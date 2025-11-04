@@ -93,7 +93,7 @@ const injectToastToPage = async (variant, content) => {
               transform: translateY(0);
             }
             .qa-autofill-toast.qa-autofill-toast--success {
-              background: #1e8e3e;
+              background: #59b272ff;
             }
             .qa-autofill-toast.qa-autofill-toast--error {
               background: #d93025;
@@ -161,7 +161,7 @@ runButton?.addEventListener("click", async () => {
       files: ["runner.js"]
     });
 
-    showStatus("success", "Formulario completado con datos de prueba.");
+    showStatus("success", "Formulario completado exitosamente");
     await showToast("success", "Datos completados correctamente.");
   } catch (error) {
     console.warn("[Autofill QA] Error al ejecutar runner.js", error);

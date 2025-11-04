@@ -367,3 +367,143 @@
     console.warn("[Autofill QA] Error:", e);
   }
 })();
+
+// --- Reporte de resultado de envío de formulario ---
+(function () {
+  // Toast simple en la página (opcional)
+  function showToast(msg, type = "info") {
+    try {
+      const id = "__qa_form_toast__";
+      let el = document.getElementById(id);
+      if (!el) {
+        el = document.createElement("div");
+        el.id = id;
+        el.style.position = "fixed";
+        el.style.zIndex = "2147483647";
+        el.style.top = "12px";
+        el.style.right = "12px";
+        el.style.maxWidth = "320px";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "10px";
+        el.style.boxShadow = "0 6px 20px rgba(0,0,0,.15)";
+        el.style.fontFamily = "system-ui, -apple-system, Figtree";
+        el.style.fontSize = "14px";
+        el.style.background = "white";
+        el.style.border = "1px solid #e6e6f8";
+        el.style.color = "#111";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.borderColor = type === "success" ? "#cce7d8" : type === "error" ? "#f4c7c3" : "#e6e6f8";
+      el.style.background = type === "success" ? "#eefaf3" : type === "error" ? "#fef1f0" : "white";
+      el.style.color = type === "success" ? "#136b3c" : type === "error" ? "#8a1d17" : "#111";
+      clearTimeout(el.__t);
+      el.__t = setTimeout(() => el.remove(), 3500);
+    } catch {}
+  }
+
+  // Ayuda a enviar a la extensión (popup/background)
+  function notify(status, detail = {}) {
+    const payload = {
+      type: "form-submit-status",
+      ok: status === "success",
+      status,
+      ...detail,
+      url: detail.url || location.href,
+      ts: Date.now(),
+    };
+    try { chrome.runtime?.sendMessage?.(payload); } catch {}
+  }
+
+  // Heurística: ¿es envío de formulario?
+  function isFormLikeRequest(method, url, body) {
+    const m = (method || "GET").toUpperCase();
+    if (m === "GET") return false;
+    // POST/PUT/PATCH comunes en submit
+    if (!/^(POST|PUT|PATCH)$/i.test(m)) return false;
+    // filtros suaves: acción conocida o FormData/urlencoded
+    if (body instanceof FormData) return true;
+    if (typeof body === "string" && /(^|&)(email|mail|correo|name|nombre|phone|tel)=/i.test(body)) return true;
+    if (body && typeof body === "object") return true; // JSON de forms SPA
+    return /submit|form|contact|lead|signup|suscri|registro/i.test(url);
+  }
+
+  // --- Parche fetch ---
+  const _fetch = window.fetch;
+  window.fetch = async function(input, init = {}) {
+    try {
+      const req = input instanceof Request ? input : new Request(String(input), init);
+      const method = (req.method || "GET").toUpperCase();
+      let body = init?.body ?? (input instanceof Request ? input.body : undefined);
+
+      // No podemos leer un stream body directamente; detectamos por headers
+      let bodyHint = body;
+      const ct = req.headers.get("content-type") || init?.headers?.["content-type"] || "";
+      if (!bodyHint && /json|x-www-form-urlencoded|form-data/i.test(ct)) {
+        // sin leer stream; nos quedamos con la pista del header
+        bodyHint = { contentType: ct };
+      }
+
+      const looksLikeForm = isFormLikeRequest(method, req.url, bodyHint);
+      const res = await _fetch(req);
+
+      if (looksLikeForm) {
+        if (res.ok) {
+          notify("success", { httpStatus: res.status, method, endpoint: req.url });
+          showToast("Envío exitoso", "success");
+        } else {
+          notify("error", { httpStatus: res.status, method, endpoint: req.url });
+          showToast(`Error al enviar (HTTP ${res.status})`, "error");
+        }
+      }
+      return res;
+    } catch (e) {
+      notify("error", { error: String(e) });
+      showToast("Error de red al enviar", "error");
+      throw e;
+    }
+  };
+
+  // --- Parche XHR ---
+  const _open = XMLHttpRequest.prototype.open;
+  const _send = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+    this.__qa_method = method;
+    this.__qa_url = url;
+    return _open.apply(this, arguments);
+  };
+  XMLHttpRequest.prototype.send = function(body) {
+    this.addEventListener("loadend", () => {
+      try {
+        if (isFormLikeRequest(this.__qa_method, this.__qa_url, body)) {
+          const ok = this.status >= 200 && this.status < 300;
+          if (ok) {
+            notify("success", { httpStatus: this.status, method: this.__qa_method, endpoint: this.__qa_url });
+            showToast("Envío exitoso", "success");
+          } else {
+            notify("error", { httpStatus: this.status, method: this.__qa_method, endpoint: this.__qa_url });
+            showToast(`Error al enviar (HTTP ${this.status})`, "error");
+          }
+        }
+      } catch {}
+    });
+    return _send.apply(this, arguments);
+  };
+
+  // --- Submit tradicional (navegación completa) ---
+  // Avisamos que se disparó un submit y probablemente habrá navegación.
+  // No siempre podremos saber el resultado porque se recarga la página.
+  document.addEventListener("submit", (ev) => {
+    try {
+      const form = ev.target;
+      const action = form?.action || location.href;
+      const method = (form?.method || "GET").toUpperCase();
+      if (method !== "GET") {
+        // Si el sitio usa submit tradicional, inmediatamente anunciamos "enviando..."
+        notify("pending", { method, endpoint: action });
+        showToast("Enviando formulario…", "info");
+      }
+    } catch {}
+  }, true);
+
+})();
