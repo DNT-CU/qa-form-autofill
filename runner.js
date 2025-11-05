@@ -306,9 +306,11 @@
           'input[name*="last" i]','input[id*="last" i]','input[autocomplete="family-name"]'
         ].join(","), value: VALUES.apellido },
       { sel: [
-          'input[type="tel"]','input[name*="fono" i]','input[id*="fono" i]',
-          'input[name*="telef" i]','input[id*="telef" i]','input[autocomplete="tel"]'
-        ].join(","), value: null, make: buildPhoneValue },
+          'input[type="tel"]','input[name*="fono" i]','input[id*="fono" i]','input[aria-label*="fono" i]','input[placeholder*="fono" i]',
+          'input[name*="telef" i]','input[id*="telef" i]','input[aria-label*="telef" i]','input[placeholder*="telef" i]',
+          'input[name*="phone" i]','input[id*="phone" i]','input[aria-label*="phone" i]','input[placeholder*="phone" i]',
+          'input[autocomplete="tel"]'
+        ].join(","), value: VALUES.telefono, make: buildPhoneValue },
       { sel: [
           'input[type="email"]','input[name*="mail" i]','input[id*="mail" i]',
           'input[name*="correo" i]','input[id*="correo" i]','input[autocomplete="email"]'
