@@ -269,6 +269,13 @@
     }
   };
 
+  const fillRandomDropdowns = () => {
+    document.querySelectorAll("select").forEach((sel) => {
+      if (!isFillable(sel)) return;
+      pickRandomOption(sel);
+    });
+  };
+
   const pickRandomRadioByGroup = () => {
     const radios = [...document.querySelectorAll('input[type="radio"]')].filter(isFillable);
     const byName = radios.reduce((acc, r) => {
@@ -285,13 +292,41 @@
     });
   };
 
-  const checkRequiredCheckboxes = () => {
+  const fillRandomCheckboxes = () => {
     const boxes = [...document.querySelectorAll('input[type="checkbox"]')].filter(isFillable);
-    boxes.forEach(b => {
-      if (b.required) {
-        b.checked = true;
-        fire(b, "change");
+    if (!boxes.length) return;
+
+    let anonId = 0;
+    const groups = boxes.reduce((acc, box) => {
+      const key = box.name && box.name.trim() ? `name:${box.name.trim()}` : `anon:${anonId++}`;
+      (acc[key] ||= []).push(box);
+      return acc;
+    }, {});
+
+    Object.values(groups).forEach(group => {
+      const required = group.filter(b => b.required);
+      const optional = group.filter(b => !b.required);
+      const isMultiGroup = group.length > 1;
+      const mustSelectOne = isMultiGroup && !required.length;
+
+      const maxSelectable = optional.length ? Math.min(optional.length, 3) : 0;
+      const minSelectable = optional.length ? (mustSelectOne ? 1 : 0) : 0;
+      const count = optional.length ? randInt(minSelectable, Math.max(minSelectable, maxSelectable)) : 0;
+      const pool = [...optional];
+      const chosen = new Set();
+
+      for (let i = 0; i < count && pool.length; i++) {
+        const pick = pool.splice(randInt(0, pool.length - 1), 1)[0];
+        chosen.add(pick);
       }
+
+      group.forEach(box => {
+        const shouldCheck = box.required || chosen.has(box);
+        if (box.checked !== shouldCheck) {
+          box.checked = shouldCheck;
+          fire(box, "change");
+        }
+      });
     });
   };
 
@@ -342,13 +377,9 @@
       applyValue(ta, VALUES.texto);
     });
 
-    document.querySelectorAll("select").forEach((sel) => {
-      if (!isFillable(sel)) return;
-      pickRandomOption(sel);
-    });
-
+    fillRandomDropdowns();
     pickRandomRadioByGroup();
-    checkRequiredCheckboxes();
+    fillRandomCheckboxes();
   };
 
   try {
