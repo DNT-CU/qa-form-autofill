@@ -7,7 +7,7 @@ chrome.commands.onCommand.addListener(async (command) => {
   try {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: ["runner.js"]
+      files: ["Config.js", "runner.js"]
     });
   } catch (e) {
     console.warn("[Autofill QA] No se pudo inyectar runner.js:", e);
