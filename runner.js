@@ -473,25 +473,30 @@
       if (!el) {
         el = document.createElement("div");
         el.id = id;
-        el.style.position = "fixed";
-        el.style.zIndex = "2147483647";
-        el.style.top = "12px";
-        el.style.right = "12px";
-        el.style.maxWidth = "320px";
-        el.style.padding = "10px 12px";
-        el.style.borderRadius = "10px";
-        el.style.boxShadow = "0 6px 20px rgba(0,0,0,.15)";
-        el.style.fontFamily = "system-ui, -apple-system, Figtree";
-        el.style.fontSize = "14px";
-        el.style.background = "white";
-        el.style.border = "1px solid #e6e6f8";
-        el.style.color = "#111";
+        Object.assign(el.style, {
+          position: "fixed",
+          zIndex: "2147483647",
+          top: "12px",
+          right: "12px",
+          maxWidth: "320px",
+          padding: "10px 12px",
+          borderRadius: "10px",
+          boxShadow: "0 6px 20px rgba(0,0,0,.15)",
+          fontFamily: "system-ui, -apple-system, Figtree",
+          fontSize: "14px",
+          background: "white",
+          border: "1px solid #e6e6f8",
+          color: "#111"
+        });
         document.body.appendChild(el);
       }
       el.textContent = msg;
-      el.style.borderColor = type === "success" ? "#cce7d8" : type === "error" ? "#f4c7c3" : "#e6e6f8";
-      el.style.background = type === "success" ? "#eefaf3" : type === "error" ? "#fef1f0" : "white";
-      el.style.color = type === "success" ? "#136b3c" : type === "error" ? "#8a1d17" : "#111";
+      const palette = type === "success"
+        ? { borderColor: "#cce7d8", background: "#eefaf3", color: "#136b3c" }
+        : type === "error"
+          ? { borderColor: "#f4c7c3", background: "#fef1f0", color: "#8a1d17" }
+          : { borderColor: "#e6e6f8", background: "white", color: "#111" };
+      Object.assign(el.style, palette);
       clearTimeout(el.__t);
       el.__t = setTimeout(() => el.remove(), 3500);
     } catch {}
@@ -509,6 +514,13 @@
     };
     try { chrome.runtime?.sendMessage?.(payload); } catch {}
   }
+
+  const reportSubmitResult = (ok, detail) => {
+    const status = ok ? "success" : "error";
+    notify(status, detail);
+    const message = ok ? "Envío exitoso" : `Error al enviar (HTTP ${detail.httpStatus})`;
+    showToast(message, status);
+  };
 
   // Heurística: ¿es envío de formulario?
   function isFormLikeRequest(method, url, body) {
@@ -543,13 +555,7 @@
       const res = await _fetch.call(this, req);
 
       if (looksLikeForm) {
-        if (res.ok) {
-          notify("success", { httpStatus: res.status, method, endpoint: req.url });
-          showToast("Envío exitoso", "success");
-        } else {
-          notify("error", { httpStatus: res.status, method, endpoint: req.url });
-          showToast(`Error al enviar (HTTP ${res.status})`, "error");
-        }
+        reportSubmitResult(res.ok, { httpStatus: res.status, method, endpoint: req.url });
       }
       return res;
     } catch (e) {
@@ -572,13 +578,11 @@
       try {
         if (isFormLikeRequest(this.__qa_method, this.__qa_url, body)) {
           const ok = this.status >= 200 && this.status < 300;
-          if (ok) {
-            notify("success", { httpStatus: this.status, method: this.__qa_method, endpoint: this.__qa_url });
-            showToast("Envío exitoso", "success");
-          } else {
-            notify("error", { httpStatus: this.status, method: this.__qa_method, endpoint: this.__qa_url });
-            showToast(`Error al enviar (HTTP ${this.status})`, "error");
-          }
+          reportSubmitResult(ok, {
+            httpStatus: this.status,
+            method: this.__qa_method,
+            endpoint: this.__qa_url
+          });
         }
       } catch {}
     });
