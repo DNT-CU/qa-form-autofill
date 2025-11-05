@@ -25,7 +25,7 @@
       nombre,
       apellido,
       correo: randomEmail(nombre, apellido),
-      texto: "This is dumy text for QA tests"
+      texto: "This is dummy text for QA tests"
     };
   };
 
