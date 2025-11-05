@@ -3,6 +3,15 @@ const statusEl = document.getElementById("status");
 const toastContainer = document.getElementById("toast-container");
 
 const STATUS_VARIANTS = new Set(["success", "error"]);
+const TOAST_REMOVE_DELAY = 3600;
+const DEFAULT_TOAST_MESSAGES = {
+  success: "Operación completada",
+  error: "Ocurrió un problema",
+  default: "Operación completada"
+};
+
+const getToastContent = (variant, content) =>
+  content || DEFAULT_TOAST_MESSAGES[variant] || DEFAULT_TOAST_MESSAGES.default;
 
 const resetStatus = () => {
   if (!statusEl) return;
@@ -29,8 +38,7 @@ const renderPopupToast = (variant, content) => {
   if (!toastContainer) return;
   const toast = document.createElement("div");
   toast.className = variant ? `toast toast--${variant}` : "toast";
-  toast.textContent = content
-    || (variant === "error" ? "Ocurrió un problema" : "Operación completada");
+  toast.textContent = getToastContent(variant, content);
   toast.setAttribute("role", variant === "error" ? "alert" : "status");
   toastContainer.appendChild(toast);
 
@@ -38,11 +46,10 @@ const renderPopupToast = (variant, content) => {
     toast.classList.add("is-visible");
   });
 
-  const removeDelay = 3600;
   setTimeout(() => {
     toast.classList.remove("is-visible");
     setTimeout(() => toast.remove(), 280);
-  }, removeDelay);
+  }, TOAST_REMOVE_DELAY);
 };
 
 const injectToastToPage = async (variant, content) => {
@@ -52,10 +59,9 @@ const injectToastToPage = async (variant, content) => {
 
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      args: [variant, content],
-      func: (variant, content) => {
-        const finalContent = content
-          || (variant === "error" ? "Ocurrió un problema" : "Operación completada");
+      args: [variant, content, DEFAULT_TOAST_MESSAGES, TOAST_REMOVE_DELAY],
+      func: (variant, content, defaults, removeDelay) => {
+        const finalContent = content || defaults[variant] || defaults.default;
 
         const styleId = "qa-autofill-toast-styles";
         if (!document.getElementById(styleId)) {
@@ -124,7 +130,6 @@ const injectToastToPage = async (variant, content) => {
           toast.classList.add("is-visible");
         });
 
-        const removeDelay = 3600;
         setTimeout(() => {
           toast.classList.remove("is-visible");
           setTimeout(() => toast.remove(), 280);
