@@ -61,6 +61,50 @@
     catch { return (el.value || "").trim() !== ""; }
   };
 
+  const normalizeString = (str) => {
+    const base = (str || "").toString();
+    try {
+      return base
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+    } catch {
+      return base.toLowerCase();
+    }
+  };
+
+  const PHONE_KEYWORDS = [
+    "phone", "mobile", "cellphone", "cell phone", "telephone",
+    "telefono", "teléfono", "movil", "móvil", "celular"
+  ].map(normalizeString);
+
+  const collectLabelLikeText = (el) => {
+    const parts = [];
+    if (el.labels && el.labels.length) {
+      parts.push(...[...el.labels].map(label => label.textContent || ""));
+    }
+    const ariaLabel = el.getAttribute("aria-label");
+    if (ariaLabel) parts.push(ariaLabel);
+    const ariaLabelledby = el.getAttribute("aria-labelledby");
+    if (ariaLabelledby) {
+      ariaLabelledby.split(/\s+/).forEach(id => {
+        const ref = document.getElementById(id);
+        if (ref) parts.push(ref.textContent || "");
+      });
+    }
+    const closestLabel = el.closest && el.closest("label");
+    if (closestLabel) parts.push(closestLabel.textContent || "");
+    const placeholder = el.getAttribute("placeholder");
+    if (placeholder) parts.push(placeholder);
+    return parts.join(" ").trim();
+  };
+
+  const hasPhoneHint = (el) => {
+    const combined = normalizeString(collectLabelLikeText(el));
+    if (!combined) return false;
+    return PHONE_KEYWORDS.some(keyword => keyword && combined.includes(keyword));
+  };
+
   const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   const randPick = (arr) => arr[randInt(0, arr.length - 1)];
   const randDigit = () => String(randInt(0, 9));
@@ -382,7 +426,12 @@
 
     textInputs.forEach((el) => {
       if (touched.has(el) || shouldSkip(el)) return;
-      applyValue(el, VALUES.texto);
+      if (hasPhoneHint(el)) {
+        applyValue(el, buildPhoneValue(el) || VALUES.telefono);
+      } else {
+        applyValue(el, VALUES.texto);
+      }
+      touched.add(el);
     });
 
     document.querySelectorAll("textarea").forEach((ta) => {
