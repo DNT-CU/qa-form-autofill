@@ -158,7 +158,7 @@ runButton?.addEventListener("click", async () => {
   try {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: ["runner.js"]
+      files: ["Config.js", "runner.js"]
     });
 
     showStatus("success", "Formulario completado exitosamente");

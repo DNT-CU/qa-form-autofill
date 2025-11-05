@@ -1,11 +1,24 @@
 (() => {
-  const VALUES = {
+  const CONFIG = (typeof window !== "undefined" && window.QAFormAutofillConfig)
+    || (typeof globalThis !== "undefined" && globalThis.QAFormAutofillConfig)
+    || null;
+
+  const defaultValues = {
     nombre: "Nombre prueba QA",
     apellido: "Apellido prueba QA",
     telefono: "+512828282828",
     correo: "correo@pruebaQa.cl",
     texto: "Esto es un texto de prueba QA"
   };
+
+  let dynamicValues = null;
+  try {
+    dynamicValues = typeof CONFIG?.createValues === "function" ? CONFIG.createValues() : null;
+  } catch (error) {
+    console.warn("[Autofill QA] No se pudieron obtener los valores dinámicos:", error);
+  }
+
+  const VALUES = { ...defaultValues, ...(dynamicValues || {}) };
 
   // ---------- Utilidades mejoradas ----------
   const isVisible = (el) => {
@@ -465,7 +478,7 @@
   const _fetch = window.fetch;
   window.fetch = async function(input, init = {}) {
     try {
-      const req = input instanceof Request ? input : new Request(String(input), init);
+      const req = input instanceof Request ? input : new Request(input, init);
       const method = (req.method || "GET").toUpperCase();
       let body = init?.body ?? (input instanceof Request ? input.body : undefined);
 
@@ -478,7 +491,7 @@
       }
 
       const looksLikeForm = isFormLikeRequest(method, req.url, bodyHint);
-      const res = await _fetch(req);
+      const res = await _fetch.call(this, req);
 
       if (looksLikeForm) {
         if (res.ok) {
