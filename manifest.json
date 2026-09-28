@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Autofill QA: Forms testing filler",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "A simple Chrome extension that auto-fills forms with random test data for QA and development.",
   "author": "Dante Curín",
   "action": {
