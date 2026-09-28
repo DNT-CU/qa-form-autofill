@@ -19,7 +19,7 @@
   },
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
-  "homepage_url": "https://dantecurin.com",
+  "homepage_url": "https://dantecurin.com/other-projects/qa-form-autofiller",
   "minimum_chrome_version": "88",
 
  "background": {

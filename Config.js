@@ -1,10 +1,10 @@
 (() => {
   const FIRST_NAMES = [
-    "Jonathan", "Joseph", "Joestar", "Dio", "Iggy", "Mohammed", "Speedwagon", "Narancia", "Giorno", "Jotaro"
+    "Jonathan", "Joseph", "Joestar", "Dio", "Iggy", "Mohammed", "Speedwagon", "Narancia", "Giorno", "Jotaro", "Bruno", "Jean-Pierre", "Noriaki", "Robert", "Caesar", "Jolyne", "Ermes", "Foo Fighters", "Enrico"
   ];
 
   const LAST_NAMES = [
-    "Polnareff", "Joestar", "Una", "Chirga", "Abbacchio", "Avdol", "Kujo", "Zeppeli", "Brando", "Giovanna"
+    "Polnareff", "Joestar", "Una", "Chirga", "Abbacchio", "Avdol", "Kujo", "Zeppeli", "Brando", "Giovanna", "Giorno", "Narancia", "Kakyoin", "Speedwagon", "Iggy", "Dio", "Fugo", "Mista", "Fugo"
   ];
 
   const EMAIL_DOMAINS = ["QAfiller.cl", "QAfiller.io", "QAfiller.com", "QAfiller.dev", "QAfiller.net"];

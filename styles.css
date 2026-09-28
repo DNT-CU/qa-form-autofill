@@ -30,13 +30,16 @@ a {
   color: #494462;
 }
 
+p {
+  font-size: 0.8rem;
+}
+
 h1 {
   font-size: 1.5rem;
 }
 
 a {
   color: #807b9d;
-  font-size: 0.83rem;
 }
 
 .info-label {
@@ -51,7 +54,7 @@ a {
   padding: 20px 18px 18px;
   border: 1px solid #ededed;
   border-radius: 12px;
-  background: linear-gradient(48deg, rgba(237, 237, 237, 1) 0%, rgb(224, 223, 255) 50%, rgb(252, 226, 255) 100%);
+  background: linear-gradient(48deg, rgb(255, 245, 245) 0%, rgb(239, 239, 255) 50%, rgb(254, 243, 255) 100%);
 }
 
 button {
